@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium YouTube Clone</title>
+    <!-- Google Fonts for Rounded Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+    <!-- IMPORTANT: Replace 'your-fontawesome-kit.js' with your actual Font Awesome Kit URL -->
+
+    <style>
+        /* General Reset and Font */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Default to Dark Mode Styles */
+        body {
+            font-family: 'Nunito', sans-serif; /* Rounded Font */
+            background: #1a1a1a; /* Dark background */
+            color: #fff; /* White text */
+            transition: all 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background: rgba(18, 18, 18, 0.7); /* Darker header background with transparency */
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); /* Darker shadow */
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            margin: 10px 20px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .logo {
+            flex-shrink: 0;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .logo img {
+            height: 40px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo img:hover {
+            transform: scale(1.1);
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.4); /* Dark search bar background */
+            border-radius: 25px;
+            padding: 5px 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Darker shadow */
+            transition: all 0.3s ease-in-out;
+            flex-grow: 1;
+            margin: 0 10px;
+            max-width: 600px;
+        }
+
+        .search-bar input {
+            border: none;
+            background: none;
+            outline: none;
+            padding: 5px;
+            color: inherit; /* Use parent text color (white) */
+            font-size: 14px;
+            flex: 1;
+            width: 100%;
+            /* Placeholder color for dark mode */
+            color: #fff;
+        }
+         .search-bar input::placeholder {
+             color: #bbb;
+             opacity: 1; /* Ensure placeholder is visible */
+         }
+
+
+        .search-bar button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #ffe9b1; /* Accent color for search icon */
+            font-size: 18px;
+            padding: 5px;
+        }
+
+        /* Theme Toggle (Removed as requested, but keeping the style just in case) */
+         /* .theme-toggle { ... } */
+
+        /* Header Mobile Behavior */
+        @media (max-width: 768px) {
+             .header {
+                margin: 10px;
+                border-radius: 10px;
+                padding: 10px 15px;
+            }
+
+            .logo img {
+                height: 35px;
+            }
+
+            .search-bar {
+                 flex-grow: 1;
+                 margin: 0 5px;
+                 max-width: none; /* Remove max-width on mobile */
+            }
+
+            .header.search-focused .logo,
+            .header.search-focused .theme-toggle { /* Theme toggle style is kept but button is removed */
+                opacity: 0;
+                width: 0;
+                overflow: hidden;
+                margin: 0;
+                padding: 0;
+                transition: opacity 0.3s ease-in-out, width 0.3s ease-in-out, margin 0.3s ease-in-out, padding 0.3s ease-in-out;
+            }
+
+            .header.search-focused .search-bar {
+                 flex-grow: 1;
+                 margin: 0;
+            }
+        }
+
+        /* Video Grid */
+         .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        /* Styles for different video formats (Layout Only - Real categorization needs API data) */
+        .video-card {
+            background: rgba(0, 0, 0, 0.3); /* Dark card background */
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); /* Darker shadow */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeIn 0.5s ease;
+            cursor: pointer;
+        }
+
+        .video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4); /* Even darker shadow on hover */
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .video-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        /* Example style for a 'shorts' card - Requires data to identify */
+        .video-card.short {
+             grid-column: span 1; /* Shorts take up one column */
+             max-width: 200px; /* Example max width for a vertical layout */
+             justify-self: center; /* Center shorts cards */
+        }
+
+        .video-card.short img {
+             height: 300px; /* Example height for a vertical thumbnail */
+             object-fit: cover;
+        }
+
+        .video-card .video-info {
+            padding: 15px;
+        }
+
+        .video-card .video-info h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            color: #eee; /* Lighter text for title */
+        }
+
+        .video-card .video-info p {
+            font-size: 12px;
+            color: #aaa; /* Lighter grey for channel name */
+        }
+
+
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .loader {
+            border: 4px solid #ffe9b1; /* Accent color */
+            border-top: 4px solid transparent;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Video Modal */
+        .video-modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95); /* Darker overlay */
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+            overflow-y: auto; /* Allow scrolling for the modal itself if content overflows */
+        }
+
+        .video-modal-content {
+            background: #222; /* Dark modal background */
+            border-radius: 15px;
+            width: 95%; /* Adjusted width */
+            max-width: 1200px; /* Max width for larger screens */
+            height: 90%; /* Adjusted height */
+            max-height: 90%; /* Max height for larger screens */
+            display: flex;
+            overflow: hidden; /* Hide scrollbars if content is exactly sized */
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); /* Darker shadow */
+            flex-direction: row; /* Default desktop layout: main + related side-by-side */
+        }
+
+        .video-main {
+            flex: 1; /* Takes available space */
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto; /* Allow main content area to scroll */
+            /* Added scrollbar styling for dark mode */
+            scrollbar-width: thin; /* For Firefox */
+            scrollbar-color: #555 #222; /* Thumb and Track color for Firefox */
+        }
+
+         .video-main::-webkit-scrollbar {
+            width: 8px;
+         }
+         .video-main::-webkit-scrollbar-track {
+            background: #222;
+         }
+         .video-main::-webkit-scrollbar-thumb {
+            background-color: #555;
+            border-radius: 20px;
+            border: 2px solid #222;
+         }
+
+
+        .video-main iframe {
+            width: 100%;
+            min-height: 300px; /* Minimum height for player */
+            flex-grow: 0; /* Don't let the iframe grow beyond its aspect ratio */
+            border: none;
+            border-radius: 10px;
+            /* aspect-ratio is set dynamically by JS based on video type */
+        }
+
+         /* Style for 16:9 players */
+         .video-modal-content:not(.short) .video-main iframe {
+             aspect-ratio: 16 / 9;
+             width: 100%; /* Ensure it takes full width */
+             align-self: center; /* Center if width is less than container */
+             max-width: 100%; /* Don't exceed container width */
+             min-height: auto; /* Auto height based on aspect ratio */
+        }
+
+         /* Style for 9:16 (shorts) players */
+        .video-modal-content.short .video-main iframe {
+             aspect-ratio: 9 / 16;
+             width: 100%; /* Start with 100% width */
+             max-width: 400px; /* Limit max width for a vertical layout on desktop */
+             min-height: auto; /* Auto height based on aspect ratio */
+             align-self: center; /* Center the vertical player */
+             flex-grow: 1; /* Allow vertical player to grow if space permits */
+        }
+
+
+        .video-details {
+            margin-top: 20px; /* Increased margin */
+            padding-right: 15px; /* Add some padding for scrollbar */
+             /* Added scrollbar styling for dark mode */
+            scrollbar-width: thin; /* For Firefox */
+            scrollbar-color: #555 #222; /* Thumb and Track color for Firefox */
+        }
+         .video-details::-webkit-scrollbar {
+            width: 8px;
+         }
+         .video-details::-webkit-scrollbar-track {
+            background: #222;
+         }
+         .video-details::-webkit-scrollbar-thumb {
+            background-color: #555;
+            border-radius: 20px;
+            border: 2px solid #222;
+         }
+
+
+        .video-details h2 {
+            font-size: 22px; /* Increased font size */
+            margin-bottom: 12px;
+            color: #eee; /* Lighter text */
+        }
+
+        .video-details .description {
+            font-size: 14px;
+            color: #aaa; /* Lighter grey */
+            margin-bottom: 10px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3; /* Show 3 lines initially */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.5; /* Improve readability */
+        }
+
+        .video-details .description.full {
+            display: block;
+             -webkit-line-clamp: unset; /* Remove line clamp when full */
+            overflow: visible; /* Ensure all text is visible */
+        }
+
+        .video-details .show-more {
+            color: #ffe9b1; /* Accent color */
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-block; /* Allow margin/padding if needed */
+            margin-top: 5px; /* Space above */
+        }
+
+        .channel-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0; /* Increased margin */
+        }
+
+        .channel-info img {
+            width: 45px; /* Slightly larger avatar */
+            height: 45px;
+            border-radius: 50%;
+            border: 1px solid #555; /* Subtle border */
+        }
+
+        .channel-info .channel-name {
+            flex-grow: 1;
+        }
+
+        .channel-info h3 {
+            font-size: 16px; /* Slightly larger font */
+            margin-bottom: 3px;
+            color: #eee; /* Lighter text */
+        }
+         .channel-info p {
+            font-size: 12px;
+            color: #aaa; /* Lighter grey */
+         }
+
+        .channel-info button {
+            padding: 10px 20px; /* Increased padding */
+            border: none;
+            background: #ffe9b1; /* Accent color */
+            color: #333; /* Dark text on accent */
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px; /* Increased gap */
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+
+        .channel-info button:hover {
+            background: #ffd700; /* Brighter accent on hover */
+        }
+
+        /* Desktop Close Button for Modal */
+        .close-modal-desktop {
+            position: absolute;
+            top: 15px; /* Adjusted position */
+            right: 15px; /* Adjusted position */
+            background: rgba(255, 255, 255, 0.1); /* Subtle background */
+            border: none;
+            border-radius: 50%;
+            width: 35px; /* Slightly smaller */
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px; /* Adjusted size */
+            cursor: pointer;
+            color: #fff; /* White icon */
+            z-index: 10;
+            transition: background 0.3s ease;
+            display: none; /* Hidden by default, shown on desktop */
+        }
+
+        .close-modal-desktop:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+         /* Mobile Back Button for Modal */
+        .modal-back-button {
+            display: none; /* Hidden by default on desktop */
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.5); /* Semi-transparent dark background */
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #fff; /* White icon */
+            font-size: 20px;
+            z-index: 10;
+            transition: background 0.3s ease;
+        }
+
+        .modal-back-button:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+
+        /* Related Videos */
+        .related-videos {
+            width: 350px; /* Fixed width for desktop side panel */
+            background: rgba(0, 0, 0, 0.3); /* Dark background */
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            overflow-y: auto; /* Allow related videos area to scroll */
+            border-left: 1px solid rgba(255, 255, 255, 0.1); /* Subtle separator */
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0; /* Prevent shrinking */
+             /* Added scrollbar styling for dark mode */
+            scrollbar-width: thin; /* For Firefox */
+            scrollbar-color: #555 #222; /* Thumb and Track color for Firefox */
+        }
+
+         .related-videos::-webkit-scrollbar {
+            width: 8px;
+         }
+         .related-videos::-webkit-scrollbar-track {
+            background: #222;
+         }
+         .related-videos::-webkit-scrollbar-thumb {
+            background-color: #555;
+            border-radius: 20px;
+            border: 2px solid #222;
+         }
+
+
+        .related-videos h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            position: sticky;
+            top: -20px; /* Adjust sticky position to be inside padding */
+            background: inherit; /* Use parent background */
+            z-index: 5;
+            padding-bottom: 10px;
+            padding-top: 20px; /* Match parent padding top */
+            margin-top: -20px; /* Counteract padding top */
+            color: #eee; /* Lighter text */
+        }
+
+        .related-videos-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px; /* Increased gap */
+        }
+
+        .related-video-card {
+            background: rgba(255, 255, 255, 0.05); /* Subtle dark background */
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            animation: fadeIn 0.5s ease; /* Keep animation */
+            display: flex;
+            gap: 12px; /* Increased gap */
+            padding: 8px; /* Added padding */
+            transition: background 0.2s ease;
+        }
+
+        .related-video-card:hover {
+             background: rgba(255, 255, 255, 0.1); /* Lighter background on hover */
+        }
+
+
+        .related-video-card img {
+            width: 140px; /* Wider thumbnail */
+            height: 80px; /* Taller thumbnail */
+            object-fit: cover;
+            flex-shrink: 0;
+            border-radius: 8px; /* Rounded corners for thumbnail */
+        }
+
+        .related-video-card .related-info {
+            padding-right: 8px; /* Add padding for potential scrollbar */
+            flex-grow: 1;
+        }
+
+        .related-video-card h4 {
+            font-size: 15px; /* Increased font size */
+            margin-bottom: 6px; /* Increased margin */
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            color: #eee; /* Lighter text */
+             line-height: 1.4; /* Improve readability */
+        }
+
+        .related-video-card p {
+            font-size: 12px; /* Adjusted font size */
+            color: #aaa; /* Lighter grey */
+            margin-top: 0;
+        }
+
+        /* Scroll Animations (Kept as they were) */
+        .scroll-hidden {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .scroll-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+             .video-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 15px;
+            }
+        }
+
+
+        @media (max-width: 768px) {
+            body {
+                padding-top: 60px; /* Add padding to prevent content hiding behind sticky header */
+                 background: #121212; /* Slightly darker background for mobile body */
+            }
+             .header {
+                position: fixed; /* Fix header on top */
+                top: 0;
+                left: 0;
+                right: 0;
+                margin: 0;
+                border-radius: 0;
+                padding: 10px 15px;
+                background: rgba(18, 18, 18, 0.9); /* More opaque header */
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            }
+
+            .logo img {
+                height: 35px;
+            }
+
+             .search-bar {
+                 padding: 8px 15px;
+                 background: rgba(0, 0, 0, 0.6); /* Darker search bar */
+            }
+
+            .search-bar input {
+                 font-size: 16px;
+                 padding: 5px 8px;
+            }
+
+            /* Theme toggle style is kept but button is removed */
+            /* .theme-toggle { font-size: 22px; } */
+
+            .header.search-focused .logo,
+            .header.search-focused .theme-toggle { /* Theme toggle style is kept but button is removed */
+                /* Styles defined above for mobile */
+            }
+
+            .video-grid {
+                padding: 15px;
+                gap: 15px;
+            }
+
+            .video-card img {
+                height: 180px;
+            }
+
+            /* Fullscreen Modal on Mobile */
+            .video-modal-content {
+                flex-direction: column; /* Stack content */
+                width: 100vw;
+                height: 100vh;
+                border-radius: 0;
+                max-width: none;
+                max-height: none;
+                position: relative;
+                 background: #181818; /* Darker modal background */
+                 box-shadow: none; /* No shadow on fullscreen */
+                 overflow-y: auto; /* Make the entire modal content scrollable */
+                 scrollbar-width: thin; /* For Firefox */
+                 scrollbar-color: #555 #181818; /* Thumb and Track color for Firefox */
+            }
+             .video-modal-content::-webkit-scrollbar {
+                width: 8px;
+             }
+             .video-modal-content::-webkit-scrollbar-track {
+                background: #181818;
+             }
+             .video-modal-content::-webkit-scrollbar-thumb {
+                background-color: #555;
+                border-radius: 20px;
+                border: 2px solid #181818;
+             }
+
+
+            .video-main {
+                padding: 15px;
+                 flex-grow: 0; /* Don't grow, let related videos take space below */
+                 overflow-y: visible; /* Main content doesn't need its own scrollbar on mobile */
+                 padding-bottom: 0; /* Remove padding bottom to reduce gap before related */
+                 scrollbar-width: none; /* Hide main scrollbar on mobile */
+            }
+             .video-main::-webkit-scrollbar {
+                display: none; /* Hide main scrollbar on mobile */
+             }
+
+
+            .video-main iframe {
+                 min-height: 220px; /* Adjust minimum height for mobile */
+                 flex-grow: 0; /* Prevent iframe from growing too much */
+            }
+
+             /* Styles for 16:9 players on mobile */
+             .video-modal-content:not(.short) .video-main iframe {
+                 aspect-ratio: 16 / 9;
+                 width: 100%;
+                 max-width: none; /* Allow 100% width */
+                 align-self: stretch; /* Stretch to fill width */
+            }
+
+             /* Styles for 9:16 (shorts) players on mobile */
+             .video-modal-content.short .video-main iframe {
+                 aspect-ratio: 9 / 16;
+                 min-height: 350px; /* Adjust min height for mobile shorts */
+                 max-width: 300px; /* Adjust max width for mobile shorts */
+                 width: 100%; /* Still allow 100% width if narrower than 300px */
+                 align-self: center; /* Center the vertical player */
+                 flex-grow: 0; /* Prevent growing too much */
+            }
+
+             .video-details {
+                 margin-top: 15px; /* Reduced margin */
+                 padding-right: 0; /* No padding needed for scrollbar */
+                 scrollbar-width: none; /* Hide details scrollbar on mobile */
+             }
+              .video-details::-webkit-scrollbar {
+                display: none; /* Hide details scrollbar on mobile */
+              }
+
+
+            .related-videos {
+                display: flex; /* Show related videos on mobile */
+                width: 100%; /* Take full width */
+                border-left: none; /* Remove left border */
+                margin-top: 20px; /* Space below main content */
+                padding: 15px; /* Padding for mobile */
+                overflow-y: visible; /* Related videos are part of the main modal scroll */
+                background: none; /* No separate background */
+                backdrop-filter: none; /* No separate blur */
+                 scrollbar-width: none; /* Hide related scrollbar on mobile */
+            }
+             .related-videos::-webkit-scrollbar {
+                display: none; /* Hide related scrollbar on mobile */
+             }
+
+            .related-videos h3 {
+                font-size: 16px; /* Smaller heading */
+                margin-bottom: 10px;
+                 position: static; /* Don't stick on mobile */
+                 padding: 0; /* Remove padding */
+                 margin: 0 0 10px 0; /* Add simple margin */
+            }
+
+            .related-videos-grid {
+                 gap: 10px; /* Smaller gap */
+            }
+
+            .related-video-card {
+                 gap: 10px; /* Smaller gap */
+                 padding: 6px;
+                 background: rgba(255, 255, 255, 0.08); /* Slightly different background */
+            }
+             .related-video-card:hover {
+                 background: rgba(255, 255, 255, 0.12);
+            }
+
+
+            .related-video-card img {
+                width: 100px; /* Smaller thumbnail */
+                height: 60px; /* Smaller thumbnail */
+                 border-radius: 5px;
+            }
+
+            .related-video-card .related-info h4 {
+                font-size: 13px; /* Smaller font */
+                margin-bottom: 3px;
+            }
+            .related-video-card p {
+                font-size: 10px; /* Smaller font */
+            }
+
+
+            .close-modal-desktop {
+                display: none; /* Hide desktop close button on mobile */
+            }
+
+            .modal-back-button {
+                display: flex; /* Show mobile back button */
+            }
+
+             .channel-info button {
+                 padding: 6px 12px;
+                 font-size: 14px;
+                 gap: 5px;
+             }
+             .channel-info h3 {
+                font-size: 14px;
+             }
+             .channel-info p {
+                font-size: 11px;
+             }
+             .channel-info img {
+                width: 40px;
+                height: 40px;
+             }
+
+
+        }
+
+         /* Even Smaller Screens */
+        @media (max-width: 480px) {
+            .header {
+                 padding: 8px 10px;
+            }
+            .logo img {
+                height: 30px;
+            }
+            .search-bar {
+                 padding: 6px 10px;
+            }
+            .search-bar input {
+                 font-size: 14px;
+            }
+             .search-bar button {
+                font-size: 16px;
+            }
+
+             /* Theme toggle style is kept but button is removed */
+             /* .theme-toggle { font-size: 20px; } */
+
+
+            .video-grid {
+                grid-template-columns: 1fr; /* Single column grid */
+                padding: 10px;
+                gap: 10px;
+            }
+
+             .video-card img {
+                height: 160px;
+             }
+
+             .video-card.short {
+                 max-width: 180px;
+             }
+             .video-card.short img {
+                 height: 250px;
+             }
+
+            .video-card .video-info {
+                padding: 10px;
+            }
+             .video-card .video-info h3 {
+                 font-size: 15px;
+             }
+             .video-card .video-info p {
+                 font-size: 11px;
+             }
+
+            .video-main {
+                padding: 10px;
+            }
+
+            .video-main iframe {
+                min-height: 180px;
+            }
+
+             .video-modal-content.short .video-main iframe {
+                 min-height: 280px;
+                 max-width: 250px;
+            }
+
+
+            .video-details h2 {
+                font-size: 18px;
+            }
+
+            .video-details .description,
+            .video-details .show-more {
+                font-size: 13px;
+            }
+             .channel-info {
+                 gap: 10px;
+             }
+            .channel-info img {
+                width: 35px;
+                height: 35px;
+            }
+             .channel-info h3 {
+                font-size: 13px;
+             }
+             .channel-info p {
+                font-size: 10px;
+             }
+            .channel-info button {
+                 padding: 5px 10px;
+                 font-size: 12px;
+                 gap: 4px;
+             }
+
+            .modal-back-button {
+                 width: 35px;
+                 height: 35px;
+                 font-size: 18px;
+            }
+
+             .related-videos {
+                 padding: 10px;
+                 margin-top: 15px;
+             }
+             .related-videos h3 {
+                font-size: 15px;
+             }
+             .related-video-card img {
+                width: 90px;
+                height: 55px;
+             }
+            .related-video-card .related-info h4 {
+                font-size: 12px;
+            }
+             .related-video-card p {
+                font-size: 9px;
+            }
+
+        }
+
+    </style>
+</head>
+<body class="dark"> <!-- Default body to dark mode -->
+    <div class="header" id="pageHeader">
+        <div class="logo">
+            <!-- Ensure this logo is visible on dark background -->
+            <a href="#"><img src="https://i.ibb.co/LdS0wg7r/logo.png" alt="logo" border="0"></a>
+        </div>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search videos...">
+            <button onclick="searchVideos()"><i class="fas fa-search"></i></button>
+        </div>
+        <!-- Theme Toggle button removed as requested -->
+         <!-- <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon"></i></button> -->
+    </div>
+
+     <!-- Optional: Category Headings - Would require logic to populate -->
+     <!-- <h2 class="category-heading">Trending Videos</h2> -->
+    <div class="video-grid" id="videoGrid"></div>
+     <!-- <h2 class="category-heading">Shorts</h2> -->
+     <!-- <div class="video-grid shorts-grid"></div> -->
+
+
+    <div class="loading" id="loading">
+        <div class="loader"></div>
+    </div>
+
+    <div class="video-modal" id="videoModal">
+        <div class="video-modal-content">
+            <button class="modal-back-button" onclick="closeModal()"><i class="fas fa-arrow-left"></i></button> <!-- Mobile Back Button -->
+            <button class="close-modal-desktop" onclick="closeModal()"><i class="fas fa-times"></i></button> <!-- Desktop Close Button (Renamed) -->
+
+            <div class="video-main">
+                <iframe id="videoPlayer" src="" frameborder="0" allowfullscreen></iframe>
+                <div class="video-details">
+                    <h2 id="videoTitle"></h2>
+                    <p class="description" id="videoDescription"></p>
+                    <span class="show-more" onclick="toggleDescription()">Show more</span>
+                    <div class="channel-info">
+                        <img id="channelLogo" src="" alt="Channel Logo">
+                        <div class="channel-name">
+                            <h3 id="channelName"></h3>
+                            <p id="subscriberCount"></p>
+                        </div>
+                        <button onclick="subscribe()"><i class="fas fa-plus"></i> Subscribe</button>
+                    </div>
+                     <!-- Optional: Related shorts/videos section below description for mobile -->
+                     <!-- <div class="related-videos-mobile">...</div> -->
+                </div>
+            </div>
+
+            <div class="related-videos" id="relatedVideos">
+                <h3>Related Videos</h3>
+                <div class="related-videos-grid">
+                    <!-- Related videos will load here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // IMPORTANT: Replace with your actual YouTube Data API v3 Key
+        const API_KEY = 'AIzaSyDvZSBmzSiDTIjL5962ZDJKlhuxkn6tRX0'; // <-- Replace this!
+
+        let nextPageToken = ''; // For main video grid
+        let relatedNextPageToken = ''; // For related videos grid
+        let currentSearchQuery = 'trending';
+        let isLoading = false; // For main grid
+        let isRelatedLoading = false; // For related grid
+        let currentVideoId = '';
+        let currentVideoCategory = 'trending'; // Used for related videos search
+
+        const header = document.getElementById('pageHeader');
+        const searchInput = document.getElementById('searchInput');
+        // Theme toggle button removed
+
+        // Theme Toggle - Removed as requested. Default is dark mode via body class.
+
+        // Header Search Input Focus Behavior (Mobile)
+        searchInput.addEventListener('focus', () => {
+            setTimeout(() => {
+                 header.classList.add('search-focused');
+            }, 100);
+        });
+
+        searchInput.addEventListener('blur', () => {
+             setTimeout(() => {
+                // Only remove search-focused if input is empty after blur
+                if (searchInput.value.trim() === '') {
+                     header.classList.remove('search-focused');
+                }
+            }, 100);
+        });
+
+        // Handle Enter key press on search input
+        searchInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                searchVideos();
+            }
+        });
+
+
+        // Helper to parse ISO 8601 duration (e.g., PT1M5S) to seconds
+        function parseISO8601Duration(duration) {
+             if (!duration) return 0;
+
+             const regex = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/;
+             const matches = duration.match(regex);
+
+             if (!matches) return 0;
+
+             const hours = parseInt(matches[1] || '0', 10);
+             const minutes = parseInt(matches[2] || '0', 10);
+             const seconds = parseInt(matches[3] || '0', 10);
+
+             return (hours * 3600) + (minutes * 60) + seconds;
+        }
+
+
+        // Load Videos for Main Grid
+        async function loadVideos(query = 'trending', append = false) {
+            if (isLoading) return;
+            isLoading = true;
+            document.getElementById('loading').style.display = 'flex';
+
+            // Use the search endpoint
+            const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=20&q=${encodeURIComponent(query)}&type=video&key=${API_KEY}&pageToken=${nextPageToken}`;
+
+            try {
+                const response = await fetch(url);
+                 if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                if (data.error) {
+                    console.error('YouTube API Error:', data.error.message);
+                    document.getElementById('videoGrid').innerHTML = `<p style="text-align: center; padding: 20px;">Error loading videos: ${data.error.message}</p>`;
+                     document.getElementById('loading').style.display = 'none';
+                     isLoading = false;
+                     return;
+                }
+
+                nextPageToken = data.nextPageToken || '';
+
+                const videoGrid = document.getElementById('videoGrid');
+                if (!append) {
+                    videoGrid.innerHTML = ''; // Clear grid only for new search/initial load
+                     window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top on new search
+                }
+
+                if (data.items.length === 0 && !append) {
+                     videoGrid.innerHTML = `<p style="text-align: center; padding: 20px;">No videos found for "${query}".</p>`;
+                     document.getElementById('loading').style.display = 'none';
+                     isLoading = false;
+                     return;
+                 }
+
+
+                data.items.forEach((item, index) => {
+                    // Note: Cannot reliably identify shorts vs standard here with the search endpoint
+                    // The 'short' class is kept in CSS for potential use with video details lookup.
+                    const videoCard = document.createElement('div');
+                    videoCard.className = `video-card scroll-hidden`; // Default to standard layout for grid display
+                    videoCard.innerHTML = `
+                        <img src="${item.snippet.thumbnails.high ? item.snippet.thumbnails.high.url : ''}" alt="${item.snippet.title}">
+                        <div class="video-info">
+                            <h3>${item.snippet.title}</h3>
+                            <p>${item.snippet.channelTitle}</p>
+                        </div>
+                    `;
+                    // Pass the query used for this search as the "category" for related videos later
+                    videoCard.onclick = () => openModal(item.id.videoId, item.snippet, query);
+                    videoGrid.appendChild(videoCard);
+
+                    setTimeout(() => {
+                        videoCard.classList.add('scroll-visible');
+                    }, index * 50); // Faster animation spread
+                });
+
+
+            } catch (error) {
+                console.error('Error loading videos:', error);
+                 const videoGrid = document.getElementById('videoGrid');
+                 if (!append) videoGrid.innerHTML = `<p style="text-align: center; padding: 20px; color: red;">Failed to load videos. Please check your API key and network connection.</p>`;
+                 else videoGrid.innerHTML += `<p style="text-align: center; padding: 10px; color: red;">Failed to load more videos.</p>`;
+
+            } finally {
+                isLoading = false;
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        // Search Videos
+        function searchVideos() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                alert('Please enter a search query!');
+                return;
+            }
+
+            nextPageToken = ''; // Reset main grid pagination for new search
+            currentSearchQuery = query; // Update current query for infinite scroll
+            loadVideos(query); // Load first page of search results
+        }
+
+        // Open Video Modal
+        async function openModal(videoId, initialSnippet, category) {
+            currentVideoId = videoId;
+            currentVideoCategory = category || 'trending'; // Use category passed or default
+
+            const modal = document.getElementById('videoModal');
+            const modalContent = modal.querySelector('.video-modal-content');
+            const videoPlayer = document.getElementById('videoPlayer');
+            const videoTitle = document.getElementById('videoTitle');
+            const videoDescription = document.getElementById('videoDescription');
+            const channelLogo = document.getElementById('channelLogo');
+            const channelName = document.getElementById('channelName');
+            const subscriberCount = document.getElementById('subscriberCount');
+            const showMoreBtn = modal.querySelector('.show-more');
+            const relatedVideosGrid = modal.querySelector('.related-videos-grid');
+
+
+            // Reset related videos section on modal open
+            relatedVideosGrid.innerHTML = '';
+            relatedNextPageToken = ''; // Reset related pagination
+            isRelatedLoading = false; // Reset related loading state
+            relatedVideosGrid.dataset.nextPageToken = ''; // Reset data attribute
+            relatedVideosGrid.dataset.loading = 'false'; // Reset data attribute
+
+
+            // Show modal first to allow fetching content while visible
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+
+            // Clear previous details while loading new ones
+            videoTitle.textContent = 'Loading...';
+            videoDescription.textContent = '';
+            videoDescription.classList.remove('full');
+            showMoreBtn.style.display = 'none';
+            channelLogo.src = '';
+            channelName.textContent = '';
+            subscriberCount.textContent = '';
+            // Clear iframe src temporarily to stop any previous video
+            videoPlayer.src = '';
+            modalContent.classList.remove('short'); // Reset short class
+
+
+            // Fetch full video details (including duration and channel info)
+            try {
+                 const videoDetailsUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=${videoId}&key=${API_KEY}`;
+                 const detailsResponse = await fetch(videoDetailsUrl);
+                 if (!detailsResponse.ok) throw new Error('Failed to fetch video details');
+                 const detailsData = await detailsResponse.json();
+                 const video = detailsData.items[0];
+
+                 if (video) {
+                     // Determine if it's a short (simple heuristic: duration < 60s and vertical aspect ratio thumbnail)
+                     const durationInSeconds = parseISO8601Duration(video.contentDetails.duration);
+                     const thumbnail = video.snippet.thumbnails.high || video.snippet.thumbnails.medium || video.snippet.thumbnails.default;
+                     const isShortVideo = durationInSeconds < 60 && thumbnail && thumbnail.width < thumbnail.height;
+
+                     if (isShortVideo) {
+                         modalContent.classList.add('short');
+                     } else {
+                         modalContent.classList.remove('short');
+                     }
+
+                    // Set video player source (autoplay=1 might not work on all mobile browsers)
+                    videoPlayer.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`; // rel=0 prevents showing related videos at the end
+
+
+                    // Set video details
+                    videoTitle.textContent = video.snippet.title;
+                    videoDescription.textContent = video.snippet.description || 'No description available.'; // Add fallback
+
+                    // Check if description overflows to show/hide "Show more"
+                    // Need a small delay to allow text rendering before checking scrollHeight
+                    setTimeout(() => {
+                         showMoreBtn.style.display = videoDescription.scrollHeight > videoDescription.clientHeight ? 'inline' : 'none';
+                    }, 50);
+
+
+                    // Set channel info
+                    channelLogo.src = video.snippet.channelTitle ? (video.snippet.channelThumbnails ? video.snippet.channelThumbnails.default.url : '') : ''; // Assuming channelThumbnails part was requested (it's not here)
+                    channelName.textContent = video.snippet.channelTitle || 'Channel Info Unavailable';
+
+                    // Format subscriber count (from statistics)
+                    const count = video.statistics && video.statistics.subscriberCount ? parseInt(video.statistics.subscriberCount) : 0;
+                     if (count >= 1000000) {
+                          subscriberCount.textContent = `${(count / 1000000).toFixed(1)}M subscribers`;
+                     } else if (count >= 1000) {
+                         subscriberCount.textContent = `${(count / 1000).toFixed(1)}K subscribers`;
+                     } else {
+                          subscriberCount.textContent = `${count} subscribers`;
+                     }
+
+                 } else {
+                     // Fallback if video details are missing
+                     videoTitle.textContent = 'Video details not found.';
+                     videoDescription.textContent = 'Could not load video information.';
+                     channelLogo.src = '';
+                     channelName.textContent = 'Channel Info Unavailable';
+                     subscriberCount.textContent = '';
+                     videoPlayer.src = ''; // Ensure player is empty
+                 }
+
+            } catch (error) {
+                console.error('Error fetching video details:', error);
+                videoTitle.textContent = 'Error loading video';
+                videoDescription.textContent = 'Failed to load video details.';
+                channelLogo.src = '';
+                channelName.textContent = 'Error loading channel info';
+                subscriberCount.textContent = '';
+                videoPlayer.src = ''; // Ensure player is empty
+            }
+
+
+            // Load Related Videos
+            loadRelatedVideos(); // Load first page of related videos
+
+
+             // Scroll modal content to top on open
+             modal.scrollTop = 0;
+
+
+        }
+
+        // Load Related Videos (Category-Based or RelatedToVideoId)
+        async function loadRelatedVideos(append = false) {
+             const relatedVideosGrid = document.querySelector('.related-videos-grid');
+
+             // Check if already loading related videos
+             if (isRelatedLoading) return;
+             isRelatedLoading = true;
+
+             const relatedLoading = document.createElement('div');
+             relatedLoading.className = 'loader'; // Use existing loader style
+             relatedLoading.style.margin = '20px auto';
+             relatedLoading.style.width = '20px'; // Smaller loader for related
+             relatedLoading.style.height = '20px';
+             relatedLoading.style.borderWidth = '3px';
+
+             if (!append) relatedVideosGrid.innerHTML = ''; // Clear grid if not appending
+             relatedVideosGrid.appendChild(relatedLoading); // Show loader
+
+
+             // Option 1: Use the 'relatedToVideoId' parameter (more relevant, but limited & no pagination)
+             // const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&relatedToVideoId=${currentVideoId}&type=video&key=${API_KEY}`;
+
+             // Option 2: Use the original search category (less relevant, but supports pagination)
+             const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=${encodeURIComponent(currentVideoCategory)}&type=video&key=${API_KEY}&pageToken=${relatedNextPageToken}`;
+
+             console.log("Fetching related videos with URL:", url); // Debugging
+
+
+            try {
+                const response = await fetch(url);
+                 if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                 if (data.error) {
+                     console.error('YouTube API Error (Related):', data.error.message);
+                     relatedVideosGrid.innerHTML = `<p style="text-align: center; padding: 10px;">Error loading related videos: ${data.error.message}</p>`;
+                     isRelatedLoading = false;
+                     return;
+                 }
+
+                relatedNextPageToken = data.nextPageToken || '';
+
+                 // Remove the temporary loader
+                 if (relatedLoading.parentNode === relatedVideosGrid) {
+                    relatedVideosGrid.removeChild(relatedLoading);
+                 }
+
+
+                const fragment = document.createDocumentFragment(); // Use a fragment for better performance
+                let videosAdded = 0;
+
+                data.items.forEach((item) => {
+                    // Skip the currently playing video in the related list
+                    if (item.id.videoId === currentVideoId) return;
+
+                    const relatedCard = document.createElement('div');
+                    relatedCard.className = 'related-video-card';
+                    relatedCard.innerHTML = `
+                        <img src="${item.snippet.thumbnails.medium ? item.snippet.thumbnails.medium.url : ''}" alt="${item.snippet.title}">
+                        <div class="related-info">
+                            <h4>${item.snippet.title}</h4>
+                            <p>${item.snippet.channelTitle}</p>
+                        </div>
+                    `;
+                    // When a related video is clicked, open *that* video in the modal
+                    // Pass the original video's category for the new related video search
+                    relatedCard.onclick = () => openModal(item.id.videoId, item.snippet, currentVideoCategory);
+                    fragment.appendChild(relatedCard);
+                    videosAdded++;
+                });
+
+                relatedVideosGrid.appendChild(fragment);
+
+
+                if (videosAdded === 0 && !append) {
+                     // Only show "No related videos" if it's the initial load and no videos were added
+                     relatedVideosGrid.innerHTML = `<p style="text-align: center; padding: 10px; color: #aaa;">No related videos found.</p>`;
+                 } else if (videosAdded === 0 && append) {
+                     // If appending and got no new videos, it means no more results
+                      const noMore = document.createElement('p');
+                      noMore.style.textAlign = 'center';
+                      noMore.style.padding = '10px';
+                      noMore.style.color = '#aaa';
+                      noMore.textContent = 'No more related videos.';
+                      relatedVideosGrid.appendChild(noMore);
+                 }
+
+
+            } catch (error) {
+                console.error('Error loading related videos:', error);
+                 // Remove the temporary loader
+                 if (relatedLoading.parentNode === relatedVideosGrid) {
+                    relatedVideosGrid.removeChild(relatedLoading);
+                 }
+                 if (!append) relatedVideosGrid.innerHTML = `<p style="text-align: center; padding: 10px; color: red;">Failed to load related videos.</p>`;
+                 else relatedVideosGrid.innerHTML += `<p style="text-align: center; padding: 10px; color: red;">Failed to load more related videos.</p>`;
+
+            } finally {
+                 isRelatedLoading = false; // Reset loading state
+            }
+        }
+
+
+        // Toggle Description (Show More/Less)
+        function toggleDescription() {
+            const description = document.getElementById('videoDescription');
+            const showMore = document.querySelector('.video-details .show-more'); // Select the one inside video-details
+            description.classList.toggle('full');
+            showMore.textContent = description.classList.contains('full') ? 'Show less' : 'Show more';
+             // Adjust description visibility check after toggling
+             setTimeout(() => {
+                showMore.style.display = description.scrollHeight > description.clientHeight || description.classList.contains('full') ? 'inline' : 'none';
+             }, 0);
+        }
+
+        // Subscribe (Placeholder)
+        function subscribe() {
+            alert('Subscribed to channel!');
+            // In a real app, you'd integrate with YouTube API for subscriptions
+        }
+
+        // Modal Controls
+        function closeModal() {
+            const modal = document.getElementById('videoModal');
+            const videoPlayer = document.getElementById('videoPlayer');
+            modal.style.display = 'none';
+            // Stop the video when closing the modal by setting src to empty
+            videoPlayer.src = '';
+            document.body.style.overflow = ''; // Restore background scrolling
+            // Reset related videos pagination and loading state
+            relatedNextPageToken = '';
+            isRelatedLoading = false;
+            const relatedVideosGrid = document.querySelector('.related-videos-grid');
+            if (relatedVideosGrid) {
+                 relatedVideosGrid.dataset.nextPageToken = '';
+                 relatedVideosGrid.dataset.loading = 'false';
+                 relatedVideosGrid.innerHTML = ''; // Clear related videos on close
+            }
+             // Remove short class from modal content
+             modal.querySelector('.video-modal-content').classList.remove('short');
+        }
+
+        // Close modal when clicking outside the modal content
+        document.getElementById('videoModal').addEventListener('click', function(event) {
+            // Check if the click was directly on the modal overlay and not inside the modal content
+            const modalContent = this.querySelector('.video-modal-content');
+            const target = event.target;
+            if (target === this || (modalContent && !modalContent.contains(target) && !target.closest('.video-modal-content'))) {
+                 closeModal();
+            }
+        });
+
+
+        // Infinite Scroll for main grid
+        window.addEventListener('scroll', () => {
+            // Only trigger if modal is not open
+            if (document.getElementById('videoModal').style.display !== 'flex') {
+                 const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+                 const scrolled = window.scrollY;
+                 const threshold = 500; // Load more when 500px from bottom
+
+                 if (scrolled >= scrollableHeight - threshold && !isLoading && nextPageToken) {
+                     loadVideos(currentSearchQuery, true); // Append videos
+                 }
+            }
+        });
+
+        // Infinite Scroll for Related Videos in Modal
+        const relatedVideosContainer = document.getElementById('relatedVideos');
+        if (relatedVideosContainer) {
+            relatedVideosContainer.addEventListener('scroll', function () {
+                // Calculate if scrolled near bottom
+                const isNearBottom = this.scrollTop + this.clientHeight >= this.scrollHeight - 100;
+
+                // Only trigger if on desktop, not currently loading, and there's a next page token
+                if (window.innerWidth > 768 && isNearBottom && !isRelatedLoading && relatedNextPageToken) {
+                    loadRelatedVideos(true); // Append related videos
+                }
+            });
+        }
+
+         // Event listener to hide/show desktop/mobile close buttons based on screen size
+         function updateModalCloseButtons() {
+             const desktopBtn = document.querySelector('.close-modal-desktop');
+             const mobileBtn = document.querySelector('.modal-back-button');
+             if (window.innerWidth <= 768) {
+                 desktopBtn.style.display = 'none';
+                 mobileBtn.style.display = 'flex';
+             } else {
+                 desktopBtn.style.display = 'flex';
+                 mobileBtn.style.display = 'none';
+             }
+         }
+
+         // Update button visibility on modal open and on window resize
+         document.getElementById('videoModal').addEventListener('transitionend', function() {
+             if (this.style.display === 'flex') {
+                 updateModalCloseButtons();
+             }
+         });
+         window.addEventListener('resize', updateModalCloseButtons);
+         // Initial check in case modal is open on page load (unlikely but safe)
+         updateModalCloseButtons();
+
+
+        // Initial Load
+        loadVideos(currentSearchQuery);
+    </script>
+</body>
+</html>
